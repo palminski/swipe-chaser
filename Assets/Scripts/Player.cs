@@ -28,22 +28,7 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // RaycastHit2D hit = Physics2D.Raycast(
-        //     (Vector2)collider.bounds.center + (collider.bounds.extents * move.normalized),
-        //     move.normalized,
-        //     moveSpeed * Time.deltaTime ,
-        //     collidableLayers
-        // );
-
-        // if (hit.collider != null)
-        // {
-        //     transform.Translate(move * hit.distance);
-        //     move = Vector2.zero;
-        // }
-        // else
-        // {
-        //     transform.Translate(move * moveSpeed * Time.deltaTime);
-        // }
+        transform.rotation = Quaternion.FromToRotation(Vector3.right, move);
     }
 
     void FixedUpdate()
