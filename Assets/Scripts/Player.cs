@@ -2,8 +2,10 @@ using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 [RequireComponent(typeof(BoxCollider2D))]
+[RequireComponent(typeof(RaycastController))]
 public class Player : MonoBehaviour
 {
+    private RaycastController raycastController;
     public Vector2 move;
     public float moveSpeed = 1f;
     public LayerMask collidableLayers;
@@ -18,17 +20,22 @@ public class Player : MonoBehaviour
     {
         GameController.Instance.Input.MovePressed -= OnMovePressed;        
     }
+    void Awake()
+    {
+        raycastController = GetComponent<RaycastController>();
+        collider = GetComponent<BoxCollider2D>();
+        rb = GetComponent<Rigidbody2D>();
+    }
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        collider = GetComponent<BoxCollider2D>();
-        rb = GetComponent<Rigidbody2D>();
+        
     }
 
     // Update is called once per frame
     void Update()
     {
-        transform.rotation = Quaternion.FromToRotation(Vector3.right, move);
+        // transform.rotation = Quaternion.FromToRotation(Vector3.right, move);
     }
 
     void FixedUpdate()
@@ -40,9 +47,11 @@ public class Player : MonoBehaviour
             collidableLayers
         );
 
-        if (hit.collider != null)
+        RaycastControllerResult result = raycastController.CastRays(move,moveSpeed);
+
+        if (result.hit)
         {
-            rb.MovePosition(rb.position + (move * hit.distance));
+            rb.MovePosition(rb.position + (move * result.distance));
             move = Vector2.zero;
         }
         else
@@ -55,5 +64,22 @@ public class Player : MonoBehaviour
     {
         if(Vector2.Dot(move, moveInput) < 0f) return;
         move = moveInput;
+    }
+
+    // ====================================
+
+
+
+    public struct CollisionInfo
+    {
+        public bool above, below, left, right;
+
+        public void Reset()
+        {
+            above = false;
+            below = false;
+            left = false;
+            right = false;
+        }
     }
 }
