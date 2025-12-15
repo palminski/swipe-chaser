@@ -8,6 +8,7 @@ public class Player : MonoBehaviour
     public float moveSpeed = 1f;
     public LayerMask collidableLayers;
     private BoxCollider2D collider;
+    private Rigidbody2D rb;
     void OnEnable()
     {
         GameController.Instance.Input.MovePressed += OnMovePressed;        
@@ -21,27 +22,47 @@ public class Player : MonoBehaviour
     void Start()
     {
         collider = GetComponent<BoxCollider2D>();
+        rb = GetComponent<Rigidbody2D>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        // transform.rotation = Quaternion.FromToRotation(Vector3.right, move);
+        // RaycastHit2D hit = Physics2D.Raycast(
+        //     (Vector2)collider.bounds.center + (collider.bounds.extents * move.normalized),
+        //     move.normalized,
+        //     moveSpeed * Time.deltaTime ,
+        //     collidableLayers
+        // );
+
+        // if (hit.collider != null)
+        // {
+        //     transform.Translate(move * hit.distance);
+        //     move = Vector2.zero;
+        // }
+        // else
+        // {
+        //     transform.Translate(move * moveSpeed * Time.deltaTime);
+        // }
+    }
+
+    void FixedUpdate()
+    {
         RaycastHit2D hit = Physics2D.Raycast(
             (Vector2)collider.bounds.center + (collider.bounds.extents * move.normalized),
             move.normalized,
-            moveSpeed * Time.deltaTime ,
+            moveSpeed ,
             collidableLayers
         );
 
         if (hit.collider != null)
         {
-            transform.Translate(move * hit.distance);
+            rb.MovePosition(rb.position + (move * hit.distance));
             move = Vector2.zero;
         }
         else
         {
-            transform.Translate(move * moveSpeed * Time.deltaTime);
+            rb.MovePosition(rb.position + (move * moveSpeed));
         }
     }
 
