@@ -2,8 +2,10 @@ using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 [RequireComponent(typeof(BoxCollider2D))]
+[RequireComponent(typeof(RaycastController))]
 public class Player : MonoBehaviour
 {
+    private RaycastController raycastController;
     public Vector2 move;
     public float moveSpeed = 1f;
     public LayerMask collidableLayers;
@@ -11,54 +13,48 @@ public class Player : MonoBehaviour
     private Rigidbody2D rb;
     void OnEnable()
     {
-        GameController.Instance.Input.MovePressed += OnMovePressed;        
+        GameController.Instance.Input.MovePressed += OnMovePressed;
     }
 
     void OnDisable()
     {
-        GameController.Instance.Input.MovePressed -= OnMovePressed;        
+        GameController.Instance.Input.MovePressed -= OnMovePressed;
+    }
+    void Awake()
+    {
+        raycastController = GetComponent<RaycastController>();
+        collider = GetComponent<BoxCollider2D>();
+        rb = GetComponent<Rigidbody2D>();
     }
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        collider = GetComponent<BoxCollider2D>();
-        rb = GetComponent<Rigidbody2D>();
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        // RaycastHit2D hit = Physics2D.Raycast(
-        //     (Vector2)collider.bounds.center + (collider.bounds.extents * move.normalized),
-        //     move.normalized,
-        //     moveSpeed * Time.deltaTime ,
-        //     collidableLayers
-        // );
-
-        // if (hit.collider != null)
-        // {
-        //     transform.Translate(move * hit.distance);
-        //     move = Vector2.zero;
-        // }
-        // else
-        // {
-        //     transform.Translate(move * moveSpeed * Time.deltaTime);
-        // }
+        // transform.rotation = Quaternion.FromToRotation(Vector3.right, move);
     }
 
     void FixedUpdate()
     {
-        RaycastHit2D hit = Physics2D.Raycast(
-            (Vector2)collider.bounds.center + (collider.bounds.extents * move.normalized),
-            move.normalized,
-            moveSpeed ,
-            collidableLayers
-        );
 
-        if (hit.collider != null)
+        RaycastControllerResult result = raycastController.CastRays(move, moveSpeed);
+        if (result.hit)
         {
-            rb.MovePosition(rb.position + (move * hit.distance));
-            move = Vector2.zero;
+            //Check and adjust if barely hitting wall
+            Vector2 shiftAmmount = raycastController.GetOffsetCorrection(move, moveSpeed);
+            if (shiftAmmount != Vector2.zero)
+            {
+                rb.MovePosition(rb.position + shiftAmmount + (move * moveSpeed));
+            }
+            else
+            {
+                rb.MovePosition(rb.position + (move * result.distance));
+                move = Vector2.zero;
+            }
         }
         else
         {
@@ -68,7 +64,24 @@ public class Player : MonoBehaviour
 
     void OnMovePressed(Vector2 moveInput)
     {
-        if(Vector2.Dot(move, moveInput) < 0f) return;
+        if (Vector2.Dot(move, moveInput) < 0f) return;
         move = moveInput;
+    }
+
+    // ====================================
+
+
+
+    public struct CollisionInfo
+    {
+        public bool above, below, left, right;
+
+        public void Reset()
+        {
+            above = false;
+            below = false;
+            left = false;
+            right = false;
+        }
     }
 }
