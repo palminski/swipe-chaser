@@ -13,12 +13,12 @@ public class Player : MonoBehaviour
     private Rigidbody2D rb;
     void OnEnable()
     {
-        GameController.Instance.Input.MovePressed += OnMovePressed;        
+        GameController.Instance.Input.MovePressed += OnMovePressed;
     }
 
     void OnDisable()
     {
-        GameController.Instance.Input.MovePressed -= OnMovePressed;        
+        GameController.Instance.Input.MovePressed -= OnMovePressed;
     }
     void Awake()
     {
@@ -29,7 +29,7 @@ public class Player : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
+
     }
 
     // Update is called once per frame
@@ -43,16 +43,24 @@ public class Player : MonoBehaviour
         RaycastHit2D hit = Physics2D.Raycast(
             (Vector2)collider.bounds.center + (collider.bounds.extents * move.normalized),
             move.normalized,
-            moveSpeed ,
+            moveSpeed,
             collidableLayers
         );
 
-        RaycastControllerResult result = raycastController.CastRays(move,moveSpeed);
+        RaycastControllerResult result = raycastController.CastRays(move, moveSpeed);
 
         if (result.hit)
         {
-            rb.MovePosition(rb.position + (move * result.distance));
-            move = Vector2.zero;
+            Vector2 shiftAmmount = raycastController.CheckSlightMisalignment(move, moveSpeed);
+            if (shiftAmmount != Vector2.zero)
+            {
+                rb.MovePosition(rb.position + shiftAmmount + (move * moveSpeed));
+            }
+            else
+            {
+                rb.MovePosition(rb.position + (move * result.distance));
+                move = Vector2.zero;
+            }
         }
         else
         {
@@ -62,7 +70,7 @@ public class Player : MonoBehaviour
 
     void OnMovePressed(Vector2 moveInput)
     {
-        if(Vector2.Dot(move, moveInput) < 0f) return;
+        if (Vector2.Dot(move, moveInput) < 0f) return;
         move = moveInput;
     }
 
