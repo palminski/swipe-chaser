@@ -4,7 +4,7 @@ public class RaycastController : MonoBehaviour
 {
     private BoxCollider2D boxCollider;
     [SerializeField] private float skinWidth = 0.001f;
-    [SerializeField] private float offsetCorrection = 0.1f;
+    [SerializeField] private float offsetCorrectionThreshold = 0.1f;
     public RaycastOrigins raycastOrigins;
     public float topBottomRaySpacing;
     public float sideRaySpacing;
@@ -96,9 +96,8 @@ public class RaycastController : MonoBehaviour
         return result;
     }
 
-    public Vector2 CheckSlightMisalignment(Vector2 direction, float distance)
+    public Vector2 GetOffsetCorrection(Vector2 direction, float distance)
     {
-        
         Vector2 rayOriginA = Vector2.zero;
         Vector2 rayOriginAOffset = Vector2.zero;
         Vector2 rayOriginB = Vector2.zero;
@@ -108,54 +107,51 @@ public class RaycastController : MonoBehaviour
         if (direction == Vector2.up)
         {
             rayOriginA = raycastOrigins.topLeft;
-            rayOriginAOffset = raycastOrigins.topLeft + new Vector2(offsetCorrection, 0);
+            rayOriginAOffset = raycastOrigins.topLeft + new Vector2(offsetCorrectionThreshold, 0);
 
             rayOriginB = raycastOrigins.topRight;
-            rayOriginBOffset = raycastOrigins.topRight - new Vector2(offsetCorrection, 0);
-
+            rayOriginBOffset = raycastOrigins.topRight - new Vector2(offsetCorrectionThreshold, 0);
         }
         else if (direction == Vector2.right)
         {
             rayOriginA = raycastOrigins.topRight;
-            rayOriginAOffset = raycastOrigins.topRight - new Vector2(0, offsetCorrection);
+            rayOriginAOffset = raycastOrigins.topRight - new Vector2(0, offsetCorrectionThreshold);
 
             rayOriginB = raycastOrigins.bottomRight;
-            rayOriginBOffset = raycastOrigins.bottomRight + new Vector2(0, offsetCorrection);
+            rayOriginBOffset = raycastOrigins.bottomRight + new Vector2(0, offsetCorrectionThreshold);
         }
         else if (direction == Vector2.left)
         {
             rayOriginA = raycastOrigins.bottomLeft;
-            rayOriginAOffset = raycastOrigins.bottomLeft + new Vector2(0, offsetCorrection);
+            rayOriginAOffset = raycastOrigins.bottomLeft + new Vector2(0, offsetCorrectionThreshold);
 
             rayOriginB = raycastOrigins.topLeft;
-            rayOriginBOffset = raycastOrigins.topLeft - new Vector2(0, offsetCorrection);
+            rayOriginBOffset = raycastOrigins.topLeft - new Vector2(0, offsetCorrectionThreshold);
         }
         else if (direction == Vector2.down)
         {
             rayOriginA = raycastOrigins.bottomRight;
-            rayOriginAOffset = raycastOrigins.bottomRight - new Vector2(offsetCorrection, 0);
+            rayOriginAOffset = raycastOrigins.bottomRight - new Vector2(offsetCorrectionThreshold, 0);
 
             rayOriginB = raycastOrigins.bottomLeft;
-            rayOriginBOffset = raycastOrigins.bottomLeft + new Vector2(offsetCorrection, 0);
+            rayOriginBOffset = raycastOrigins.bottomLeft + new Vector2(offsetCorrectionThreshold, 0);
         }
 
         RaycastHit2D hitA = Physics2D.Raycast(rayOriginA, direction, distance, collidableLayers);
         RaycastHit2D hitAOffset = Physics2D.Raycast(rayOriginAOffset, direction, distance, collidableLayers);
 
-
-        RaycastHit2D hitB = Physics2D.Raycast(rayOriginB, direction, distance, collidableLayers);   
+        RaycastHit2D hitB = Physics2D.Raycast(rayOriginB, direction, distance, collidableLayers);
         RaycastHit2D hitBOffset = Physics2D.Raycast(rayOriginBOffset, direction, distance, collidableLayers);
 
         if (hitA && !hitAOffset)
         {
-            print("SHOULD ADJUST A");
             Vector2 raycastStart = rayOriginAOffset + direction.normalized * distance;
-            
+
             Vector2 raycastDirection = (rayOriginA - rayOriginAOffset).normalized;
-            RaycastHit2D hit = Physics2D.Raycast(raycastStart, raycastDirection, offsetCorrection, collidableLayers);
+            RaycastHit2D hit = Physics2D.Raycast(raycastStart, raycastDirection, offsetCorrectionThreshold, collidableLayers);
             if (hit)
             {
-                float distanceToShift = offsetCorrection - hit.distance + skinWidth;
+                float distanceToShift = offsetCorrectionThreshold - hit.distance + skinWidth;
                 if (direction == Vector2.up) return new Vector2(distanceToShift, 0);
                 if (direction == Vector2.right) return new Vector2(0, -distanceToShift);
                 if (direction == Vector2.left) return new Vector2(0, distanceToShift);
@@ -164,14 +160,13 @@ public class RaycastController : MonoBehaviour
         }
         if (hitB && !hitBOffset)
         {
-            print("SHOULD ADJUST B");
             Vector2 raycastStart = rayOriginBOffset + direction.normalized * distance;
-            
+
             Vector2 raycastDirection = (rayOriginB - rayOriginBOffset).normalized;
-            RaycastHit2D hit = Physics2D.Raycast(raycastStart, raycastDirection, offsetCorrection, collidableLayers);
+            RaycastHit2D hit = Physics2D.Raycast(raycastStart, raycastDirection, offsetCorrectionThreshold, collidableLayers);
             if (hit)
             {
-                float distanceToShift = offsetCorrection - hit.distance + skinWidth;
+                float distanceToShift = offsetCorrectionThreshold - hit.distance + skinWidth;
                 if (direction == Vector2.up) return new Vector2(-distanceToShift, 0);
                 if (direction == Vector2.right) return new Vector2(0, distanceToShift);
                 if (direction == Vector2.left) return new Vector2(0, -distanceToShift);
@@ -182,30 +177,6 @@ public class RaycastController : MonoBehaviour
     }
 
 
-
-    // private float FindMinShiftToClear(
-    //     Vector2 origin,
-    //     Vector2 originOffset,
-    //     Vector2 castDir,
-    //     float castDist,
-    //     LayerMask mask,
-    //     Collider2D colliderToClear
-    // )
-    // {
-    //     Vector2 shiftVec = originOffset - origin;
-    //     float maxShift = shiftVec.magnitude;
-    //     if (maxShift <= 0f)
-    //     {
-    //         return 0f;
-    //     }
-    //     Vector2 shiftDir = shiftVec / maxShift;
-
-    //     float low = 0.1f;
-    //     float high = maxShift;
-
-    //     RaycastHit2D startHit = Physics2D.Raycast(origin, castDir, castDist, mask);
-    // }
-
     public void UpdateRaycastOrigins()
     {
         Bounds bounds = boxCollider.bounds;
@@ -215,8 +186,6 @@ public class RaycastController : MonoBehaviour
         raycastOrigins.topLeft = new Vector2(bounds.min.x, bounds.max.y);
         raycastOrigins.bottomLeft = new Vector2(bounds.min.x, bounds.min.y);
         raycastOrigins.bottomRight = new Vector2(bounds.max.x, bounds.min.y);
-
-
     }
 
     public void UpdateRaySpacing()
@@ -227,8 +196,6 @@ public class RaycastController : MonoBehaviour
         sideRaySpacing = bounds.size.x / (raysAcrossSide - 1);
         topBottomRaySpacing = bounds.size.y / (raysAcrossTop - 1);
     }
-
-
 
     public struct RaycastOrigins
     {

@@ -40,18 +40,12 @@ public class Player : MonoBehaviour
 
     void FixedUpdate()
     {
-        RaycastHit2D hit = Physics2D.Raycast(
-            (Vector2)collider.bounds.center + (collider.bounds.extents * move.normalized),
-            move.normalized,
-            moveSpeed,
-            collidableLayers
-        );
 
         RaycastControllerResult result = raycastController.CastRays(move, moveSpeed);
-
         if (result.hit)
         {
-            Vector2 shiftAmmount = raycastController.CheckSlightMisalignment(move, moveSpeed);
+            //Check and adjust if barely hitting wall
+            Vector2 shiftAmmount = raycastController.GetOffsetCorrection(move, moveSpeed);
             if (shiftAmmount != Vector2.zero)
             {
                 rb.MovePosition(rb.position + shiftAmmount + (move * moveSpeed));
