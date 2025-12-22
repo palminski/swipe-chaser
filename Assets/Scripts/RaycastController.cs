@@ -31,9 +31,8 @@ public class RaycastController : MonoBehaviour
 
     }
 
-    public RaycastControllerResult CastRays(Vector2 direction, float distance)
+    public RaycastControllerResult CastRays(Vector2 direction, float distance, Vector2? moveDirection = null)
     {
-        UpdateRaycastOrigins();
         UpdateRaySpacing();
 
         RaycastControllerResult result = new RaycastControllerResult();
@@ -44,27 +43,36 @@ public class RaycastController : MonoBehaviour
         Vector2 rayOrigin = Vector2.zero;
         Vector2 offsetStep = Vector2.zero;
 
-        int rayCount = direction.x == 0 ? raysAcrossTop : raysAcrossSide;
+        Vector2 _moveDirection = Vector2.zero;
+        if (!moveDirection.HasValue)
+        {
+            _moveDirection = direction;
+        }
+        else
+        {
+            _moveDirection = moveDirection.Value;
+        }
+        int rayCount = _moveDirection.x == 0 ? raysAcrossTop : raysAcrossSide;
 
-        if (direction == Vector2.up)
+        if (_moveDirection == Vector2.up)
         {
             offsetStep = Vector2.right;
             raySpacing = topBottomRaySpacing;
             rayOrigin = raycastOrigins.topLeft;
         }
-        else if (direction == Vector2.right)
+        else if (_moveDirection == Vector2.right)
         {
             offsetStep = Vector2.down;
             raySpacing = sideRaySpacing;
             rayOrigin = raycastOrigins.topRight;
         }
-        else if (direction == Vector2.left)
+        else if (_moveDirection == Vector2.left)
         {
             offsetStep = Vector2.up;
             raySpacing = sideRaySpacing;
             rayOrigin = raycastOrigins.bottomLeft;
         }
-        else if (direction == Vector2.down)
+        else if (_moveDirection == Vector2.down)
         {
             offsetStep = Vector2.left;
             raySpacing = topBottomRaySpacing;
@@ -89,6 +97,7 @@ public class RaycastController : MonoBehaviour
                 result.hit = true;
                 if (hit.distance < result.distance)
                 {
+                    result.normal = hit.normal;
                     result.distance = hit.distance - skinWidth;
                 }
             }
@@ -98,6 +107,9 @@ public class RaycastController : MonoBehaviour
 
     public Vector2 GetOffsetCorrection(Vector2 direction, float distance)
     {
+        float distanceA = distance;
+        float distanceB = distance;
+
         Vector2 rayOriginA = Vector2.zero;
         Vector2 rayOriginAOffset = Vector2.zero;
         Vector2 rayOriginB = Vector2.zero;
@@ -137,15 +149,17 @@ public class RaycastController : MonoBehaviour
             rayOriginBOffset = raycastOrigins.bottomLeft + new Vector2(offsetCorrectionThreshold, 0);
         }
 
-        RaycastHit2D hitA = Physics2D.Raycast(rayOriginA, direction, distance, collidableLayers);
-        RaycastHit2D hitAOffset = Physics2D.Raycast(rayOriginAOffset, direction, distance, collidableLayers);
+        RaycastHit2D hitA = Physics2D.Raycast(rayOriginA, direction, distanceA, collidableLayers);
+        if (hitA) distanceA = hitA.distance + skinWidth;
+        RaycastHit2D hitAOffset = Physics2D.Raycast(rayOriginAOffset, direction, distanceA, collidableLayers);
 
-        RaycastHit2D hitB = Physics2D.Raycast(rayOriginB, direction, distance, collidableLayers);
-        RaycastHit2D hitBOffset = Physics2D.Raycast(rayOriginBOffset, direction, distance, collidableLayers);
+        RaycastHit2D hitB = Physics2D.Raycast(rayOriginB, direction, distanceB, collidableLayers);
+        if (hitB) distanceB = hitB.distance + skinWidth;
+        RaycastHit2D hitBOffset = Physics2D.Raycast(rayOriginBOffset, direction, distanceB, collidableLayers);
 
         if (hitA && !hitAOffset)
         {
-            Vector2 raycastStart = rayOriginAOffset + direction.normalized * distance;
+            Vector2 raycastStart = rayOriginAOffset + direction.normalized * distanceA;
 
             Vector2 raycastDirection = (rayOriginA - rayOriginAOffset).normalized;
             RaycastHit2D hit = Physics2D.Raycast(raycastStart, raycastDirection, offsetCorrectionThreshold, collidableLayers);
@@ -160,7 +174,7 @@ public class RaycastController : MonoBehaviour
         }
         if (hitB && !hitBOffset)
         {
-            Vector2 raycastStart = rayOriginBOffset + direction.normalized * distance;
+            Vector2 raycastStart = rayOriginBOffset + direction.normalized * distanceB;
 
             Vector2 raycastDirection = (rayOriginB - rayOriginBOffset).normalized;
             RaycastHit2D hit = Physics2D.Raycast(raycastStart, raycastDirection, offsetCorrectionThreshold, collidableLayers);
@@ -188,6 +202,14 @@ public class RaycastController : MonoBehaviour
         raycastOrigins.bottomRight = new Vector2(bounds.max.x, bounds.min.y);
     }
 
+    public void TranslateRaycastOrigins(Vector2 translateAmount)
+    {
+        raycastOrigins.topRight += translateAmount;
+        raycastOrigins.topLeft += translateAmount;
+        raycastOrigins.bottomLeft += translateAmount;
+        raycastOrigins.bottomRight += translateAmount;
+    }
+
     public void UpdateRaySpacing()
     {
         Bounds bounds = boxCollider.bounds;
@@ -208,4 +230,5 @@ public struct RaycastControllerResult
     public bool hit;
     public float distance;
     public int hitNumber;
+    public Vector2 normal;
 }
