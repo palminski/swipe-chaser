@@ -1,3 +1,4 @@
+using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -11,14 +12,22 @@ public class Player : MonoBehaviour
     public float moveSpeed = 1f;
     public LayerMask collidableLayers;
     private Rigidbody2D rb;
+    [SerializeField] private GameObject[] attackObjects;
+    private int attackObjectIndex = 0;
+    private Coroutine attackCoroutine;
+    private Coroutine refractoryCoroutine;
+    private bool canAttack = true;
+
     void OnEnable()
     {
         GameController.Instance.Input.MovePressed += OnMovePressed;
+        GameController.Instance.Input.AttackPressed += OnAttackPressed;
     }
 
     void OnDisable()
     {
         GameController.Instance.Input.MovePressed -= OnMovePressed;
+        GameController.Instance.Input.AttackPressed -= OnAttackPressed;
     }
     void Awake()
     {
@@ -67,10 +76,10 @@ public class Player : MonoBehaviour
             }
 
             //Check if we hit a wall
-            float oppose = Vector2.Dot(delta.normalized,hit.normal);
+            float oppose = Vector2.Dot(delta.normalized, hit.normal);
             print(oppose);
-            if (oppose <= -0.9 || oppose == 0) hitWall =true;
-            
+            if (oppose <= -0.9 || oppose == 0) hitWall = true;
+
             Vector2 moveToHit = direction * hit.distance;
             totalMoved += moveToHit;
             virtualCenter += moveToHit;
@@ -90,6 +99,41 @@ public class Player : MonoBehaviour
     {
         if (Vector2.Dot(move, moveInput) < 0f) return;
         move = moveInput;
+    }
+    void OnAttackPressed()
+    {
+        if (!canAttack || attackObjectIndex >= attackObjects.Length) return;
+        if (attackCoroutine != null)
+        {
+            StopCoroutine(attackCoroutine);
+            attackCoroutine = null;
+        }
+        foreach (GameObject attackObject in attackObjects)
+        {
+            attackObject.SetActive(false);
+        }
+        attackObjects[attackObjectIndex].SetActive(true);
+        attackObjectIndex++;
+        attackCoroutine = StartCoroutine(AttackCoroutine());
+    }
+
+    private IEnumerator AttackCoroutine()
+    {
+        yield return new WaitForSeconds(0.25f);
+        foreach (GameObject attackObject in attackObjects)
+        {
+            attackObject.SetActive(false);
+        }
+        // if (refractoryCoroutine == null) refractoryCoroutine = StartCoroutine(RefractoryCoroutine());
+        attackObjectIndex = 0;
+    }
+
+    private IEnumerator RefractoryCoroutine()
+    {
+        canAttack = false;
+        yield return new WaitForSeconds(0.3f);
+        canAttack = true;
+        refractoryCoroutine = null;
     }
 
     // ====================================
