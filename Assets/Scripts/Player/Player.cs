@@ -18,9 +18,14 @@ public class Player : MonoBehaviour
     private Coroutine refractoryCoroutine;
     private bool canAttack = true;
     private bool canCharge = true;
-    private bool isCharging = false;
+    [HideInInspector]public bool isCharging = false;
     [SerializeField] private float chargePressedBuffer = 0.2f;
     private float chargePressedCountdown = 0;
+
+    [SerializeField] private float chargeAfterEnemyBuffer = 0.1f;
+    private float chargeAfterEnemyCountdown = 0;
+
+    private Vector2 startPosition;
 
     void OnEnable()
     {
@@ -42,12 +47,13 @@ public class Player : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-
+        startPosition = transform.position;
     }
 
     void Update()
     {
         if (chargePressedCountdown > 0) chargePressedCountdown -= Time.deltaTime;
+        if (chargeAfterEnemyCountdown > 0) chargeAfterEnemyCountdown -= Time.deltaTime;
     }
 
     void FixedUpdate()
@@ -118,7 +124,7 @@ public class Player : MonoBehaviour
 
     void OnMovePressed(Vector2 moveInput)
     {
-        if (Vector2.Dot(move, moveInput) < 0f || isCharging && move != Vector2.zero) return;
+        if (Vector2.Dot(move, moveInput) < 0f || (isCharging && chargeAfterEnemyCountdown <= 0) && move != Vector2.zero) return;
         move = moveInput;
     }
     void OnChargePressed()
@@ -171,7 +177,19 @@ public class Player : MonoBehaviour
 
     // ====================================
 
+    public void DebugKillPlayer()
+    {
+        transform.position = startPosition;
+        isCharging = false;
+        canCharge = true;
+        move = Vector2.zero;
+    }
 
+    public void AllowChargeDirectionChange(Vector2 position)
+    {
+        transform.position = position;
+        chargeAfterEnemyCountdown = chargeAfterEnemyBuffer;
+    }
 
     public struct CollisionInfo
     {
