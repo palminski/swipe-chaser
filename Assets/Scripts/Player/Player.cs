@@ -18,12 +18,14 @@ public class Player : MonoBehaviour
     private Coroutine refractoryCoroutine;
     private bool canAttack = true;
     private bool canCharge = true;
-    [HideInInspector]public bool isCharging = false;
+    [HideInInspector] public bool isCharging = false;
     [SerializeField] private float chargePressedBuffer = 0.2f;
     private float chargePressedCountdown = 0;
 
-    [SerializeField] private float chargeAfterEnemyBuffer = 0.1f;
-    private float chargeAfterEnemyCountdown = 0;
+    [SerializeField] private float movePressedBuffer = 0.1f;
+    private float movePressedBufferCountdown = 0;
+    private Vector2 lastMovePressed = Vector2.zero;
+
 
     private Vector2 startPosition;
 
@@ -53,20 +55,23 @@ public class Player : MonoBehaviour
     void Update()
     {
         if (chargePressedCountdown > 0) chargePressedCountdown -= Time.deltaTime;
-        if (chargeAfterEnemyCountdown > 0) chargeAfterEnemyCountdown -= Time.deltaTime;
+        if (movePressedBufferCountdown > 0)
+        {
+            movePressedBufferCountdown -= Time.deltaTime;
+        }
+        else
+        {
+            movePressedBufferCountdown = 0;
+            lastMovePressed = Vector2.zero;
+        }
+
+
     }
 
     void FixedUpdate()
     {
-        if (move == Vector2.zero)
-        {
-            if (chargePressedCountdown <= 0)
-            {
-                isCharging = false;
-                canCharge = true;
-            }
-            return;
-        }
+
+
         float speed = isCharging ? chargeSpeed : moveSpeed;
         Vector2 desiredDelta = move.magnitude * speed * move.normalized;
 
@@ -104,7 +109,7 @@ public class Player : MonoBehaviour
 
             //Check if we hit a wall
             float oppose = Vector2.Dot(delta.normalized, hit.normal);
-            
+
             if (oppose <= -0.9 || oppose == 0) hitWall = true;
 
             Vector2 moveToHit = direction * hit.distance;
@@ -124,20 +129,40 @@ public class Player : MonoBehaviour
 
     void OnMovePressed(Vector2 moveInput)
     {
-        if (Vector2.Dot(move, moveInput) < 0f || (isCharging && chargeAfterEnemyCountdown <= 0) && move != Vector2.zero) return;
+        movePressedBufferCountdown = movePressedBuffer;
+        lastMovePressed = moveInput;
+        if (chargePressedCountdown <= 0 && Vector2.Dot(move, moveInput) < 0f || isCharging && move != Vector2.zero) return;
+
         move = moveInput;
+        if (chargePressedCountdown > 0)
+        {
+            isCharging = true;
+            canCharge = false;
+        }
     }
     void OnChargePressed()
     {
+
         if (!canCharge) return;
-        canCharge = false;
-        isCharging = true;
+        // Buffer For Pressing Charge and then Move
         if (move == Vector2.zero)
         {
             chargePressedCountdown = chargePressedBuffer;
             return;
         }
-        
+        else if (isCharging && lastMovePressed != Vector2.zero)
+        {
+            chargePressedCountdown = chargePressedBuffer;
+            move = lastMovePressed;
+            if (chargePressedCountdown > 0)
+            {
+                isCharging = true;
+                canCharge = false;
+            }
+            return;
+        }
+        canCharge = false;
+        isCharging = true;
     }
     void OnAttackPressed()
     {
@@ -188,7 +213,8 @@ public class Player : MonoBehaviour
     public void AllowChargeDirectionChange(Vector2 position)
     {
         transform.position = position;
-        chargeAfterEnemyCountdown = chargeAfterEnemyBuffer;
+        canCharge = true;
+
     }
 
     public struct CollisionInfo
