@@ -10,6 +10,7 @@ public class InputController : MonoBehaviour
     public event Action<Vector2> MovePressed;
     public event Action<Vector2> MoveReleased;
     public event Action AttackPressed;
+    public event Action ChargePressed;
 
     // public void OnMove(InputValue value)
     // {
@@ -36,6 +37,11 @@ public class InputController : MonoBehaviour
     public void OnAttack(InputValue input)
     {
         if (input.isPressed) AttackPressed?.Invoke();
+    }
+
+    public void OnCharge(InputValue input)
+    {
+        if (input.isPressed) ChargePressed?.Invoke();
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created

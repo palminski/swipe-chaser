@@ -6,10 +6,10 @@ using UnityEngine;
 [RequireComponent(typeof(CastHandler))]
 public class Player : MonoBehaviour
 {
-    private RaycastController raycastController;
     private CastHandler castHandler;
     public Vector2 move;
     public float moveSpeed = 1f;
+    public float chargeSpeed = 1f;
     public LayerMask collidableLayers;
     private Rigidbody2D rb;
     [SerializeField] private GameObject[] attackObjects;
@@ -17,17 +17,22 @@ public class Player : MonoBehaviour
     private Coroutine attackCoroutine;
     private Coroutine refractoryCoroutine;
     private bool canAttack = true;
+    private bool canCharge = true;
+    private bool isCharging = false;
+    [SerializeField] private float chargePressedBuffer = 0.2f;
+    private float chargePressedCountdown = 0;
 
     void OnEnable()
     {
         GameController.Instance.Input.MovePressed += OnMovePressed;
         GameController.Instance.Input.AttackPressed += OnAttackPressed;
+        GameController.Instance.Input.ChargePressed += OnChargePressed;
     }
 
     void OnDisable()
     {
         GameController.Instance.Input.MovePressed -= OnMovePressed;
-        GameController.Instance.Input.AttackPressed -= OnAttackPressed;
+        GameController.Instance.Input.ChargePressed -= OnChargePressed;
     }
     void Awake()
     {
@@ -40,21 +45,37 @@ public class Player : MonoBehaviour
 
     }
 
-
+    void Update()
+    {
+        if (chargePressedCountdown > 0) chargePressedCountdown -= Time.deltaTime;
+    }
 
     void FixedUpdate()
     {
-        if (move == Vector2.zero) return;
+        if (move == Vector2.zero)
+        {
+            if (chargePressedCountdown <= 0)
+            {
+                isCharging = false;
+                canCharge = true;
+            }
+            return;
+        }
+        float speed = isCharging ? chargeSpeed : moveSpeed;
+        Vector2 desiredDelta = move.magnitude * speed * move.normalized;
 
-        Vector2 desiredDelta = move.magnitude * moveSpeed * move.normalized;
-
-        Vector2 resolved = ResolveWIthSliding(desiredDelta, 2, out bool hitWall);
+        Vector2 resolved = ResolveWithSliding(desiredDelta, 2, out bool hitWall);
         // print(resolved.magnitude);
-        if (hitWall) move = Vector2.zero;
+        if (hitWall)
+        {
+            move = Vector2.zero;
+            isCharging = false;
+            canCharge = true;
+        }
         rb.MovePosition(rb.position + resolved);
     }
 
-    Vector2 ResolveWIthSliding(Vector2 delta, int maxIterations, out bool hitWall)
+    Vector2 ResolveWithSliding(Vector2 delta, int maxIterations, out bool hitWall)
     {
         hitWall = false;
         Vector2 remaining = delta;
@@ -77,7 +98,7 @@ public class Player : MonoBehaviour
 
             //Check if we hit a wall
             float oppose = Vector2.Dot(delta.normalized, hit.normal);
-            print(oppose);
+            
             if (oppose <= -0.9 || oppose == 0) hitWall = true;
 
             Vector2 moveToHit = direction * hit.distance;
@@ -97,8 +118,20 @@ public class Player : MonoBehaviour
 
     void OnMovePressed(Vector2 moveInput)
     {
-        if (Vector2.Dot(move, moveInput) < 0f) return;
+        if (Vector2.Dot(move, moveInput) < 0f || isCharging && move != Vector2.zero) return;
         move = moveInput;
+    }
+    void OnChargePressed()
+    {
+        if (!canCharge) return;
+        canCharge = false;
+        isCharging = true;
+        if (move == Vector2.zero)
+        {
+            chargePressedCountdown = chargePressedBuffer;
+            return;
+        }
+        
     }
     void OnAttackPressed()
     {
