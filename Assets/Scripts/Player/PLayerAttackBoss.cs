@@ -4,7 +4,7 @@ using UnityEngine;
 
 [RequireComponent(typeof(BoxCollider2D))]
 [RequireComponent(typeof(CastHandler))]
-public class Player : MonoBehaviour
+public class PlayerAttackBoss : MonoBehaviour
 {
     private CastHandler castHandler;
     public Vector2 move;
@@ -12,10 +12,14 @@ public class Player : MonoBehaviour
     public float chargeSpeed = 1f;
     public LayerMask collidableLayers;
     private Rigidbody2D rb;
+    [SerializeField] private GameObject[] attackObjects;
+    private int attackObjectIndex = 0;
+    private Coroutine attackCoroutine;
+    private Coroutine refractoryCoroutine;
+    private bool canAttack = true;
     private bool canCharge = true;
     [HideInInspector] public bool isCharging = false;
     [SerializeField] private float chargePressedBuffer = 0.2f;
-    [SerializeField] private float chargePressedBufferInMotion = 0.05f;
     private float chargePressedCountdown = 0;
 
     [SerializeField] private float movePressedBuffer = 0.1f;
@@ -28,6 +32,7 @@ public class Player : MonoBehaviour
     void OnEnable()
     {
         GameController.Instance.Input.MovePressed += OnMovePressed;
+        GameController.Instance.Input.AttackPressed += OnAttackPressed;
         GameController.Instance.Input.ChargePressed += OnChargePressed;
     }
 
@@ -65,6 +70,8 @@ public class Player : MonoBehaviour
 
     void FixedUpdate()
     {
+
+
         float speed = isCharging ? chargeSpeed : moveSpeed;
         Vector2 desiredDelta = move.magnitude * speed * move.normalized;
 
@@ -116,50 +123,37 @@ public class Player : MonoBehaviour
             if (remaining.sqrMagnitude < 1e-8f) break;
 
         }
-        return totalMoved;
-    }
 
-    void Charge()
-    {
-        canCharge = false;
-        isCharging = true;
+        return totalMoved;
     }
 
     void OnMovePressed(Vector2 moveInput)
     {
         movePressedBufferCountdown = movePressedBuffer;
         lastMovePressed = moveInput;
-
-        if (
-            Vector2.Dot(move, moveInput) < 0f ||
-            isCharging && move != Vector2.zero && chargePressedCountdown <= 0
-            )
-        {
-            return;
-        }
+        if (chargePressedCountdown <= 0 && Vector2.Dot(move, moveInput) < 0f || isCharging && move != Vector2.zero) return;
 
         move = moveInput;
         if (chargePressedCountdown > 0)
         {
-            Charge();
+            isCharging = true;
+            canCharge = false;
         }
     }
-
     void OnChargePressed()
     {
-        if (!canCharge) return;
-        
-        // Buffer For Pressing Charge and then Move
-        chargePressedCountdown = move == Vector2.zero ? chargePressedBuffer : chargePressedBufferInMotion;
 
+        if (!canCharge) return;
+        // Buffer For Pressing Charge and then Move
         if (move == Vector2.zero)
         {
+            chargePressedCountdown = chargePressedBuffer;
             return;
         }
         else if (isCharging && lastMovePressed != Vector2.zero)
         {
             chargePressedCountdown = chargePressedBuffer;
-            if (Vector2.Dot(move, lastMovePressed) >= 0f) move = lastMovePressed;
+            move = lastMovePressed;
             if (chargePressedCountdown > 0)
             {
                 isCharging = true;
@@ -167,10 +161,44 @@ public class Player : MonoBehaviour
             }
             return;
         }
-        Charge();
+        canCharge = false;
+        isCharging = true;
+    }
+    void OnAttackPressed()
+    {
+        if (!canAttack || attackObjectIndex >= attackObjects.Length) return;
+        if (attackCoroutine != null)
+        {
+            StopCoroutine(attackCoroutine);
+            attackCoroutine = null;
+        }
+        foreach (GameObject attackObject in attackObjects)
+        {
+            attackObject.SetActive(false);
+        }
+        attackObjects[attackObjectIndex].SetActive(true);
+        attackObjectIndex++;
+        attackCoroutine = StartCoroutine(AttackCoroutine());
     }
 
+    private IEnumerator AttackCoroutine()
+    {
+        yield return new WaitForSeconds(0.25f);
+        foreach (GameObject attackObject in attackObjects)
+        {
+            attackObject.SetActive(false);
+        }
+        // if (refractoryCoroutine == null) refractoryCoroutine = StartCoroutine(RefractoryCoroutine());
+        attackObjectIndex = 0;
+    }
 
+    private IEnumerator RefractoryCoroutine()
+    {
+        canAttack = false;
+        yield return new WaitForSeconds(0.3f);
+        canAttack = true;
+        refractoryCoroutine = null;
+    }
 
     // ====================================
 
