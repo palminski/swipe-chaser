@@ -11,7 +11,8 @@ public class Player : MonoBehaviour
     public float moveSpeed = 1f;
     public float chargeSpeed = 1f;
     public LayerMask collidableLayers;
-    [HideInInspector]public Rigidbody2D rb;
+    [HideInInspector] public Rigidbody2D rb;
+    private TrailRenderer trailRenderer;
     private bool canCharge = true;
     [HideInInspector] public bool isCharging = false;
     [SerializeField] private float chargePressedBuffer = 0.2f;
@@ -38,6 +39,8 @@ public class Player : MonoBehaviour
     {
         castHandler = GetComponent<CastHandler>();
         rb = GetComponent<Rigidbody2D>();
+        trailRenderer = GetComponent<TrailRenderer>();
+        trailRenderer.time = 0.15f;
     }
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -70,6 +73,8 @@ public class Player : MonoBehaviour
         {
             move = Vector2.zero;
             isCharging = false;
+            trailRenderer.time = 0.15f;
+
             canCharge = true;
         }
         rb.MovePosition(rb.position + resolved);
@@ -119,6 +124,9 @@ public class Player : MonoBehaviour
     {
         canCharge = false;
         isCharging = true;
+        trailRenderer.time = 0.2f;
+
+
     }
 
     public void RefundCharge()
@@ -154,7 +162,7 @@ public class Player : MonoBehaviour
     void OnChargePressed()
     {
         if (!canCharge) return;
-        
+
         // Buffer For Pressing Charge and then Move
         chargePressedCountdown = move == Vector2.zero ? chargePressedBuffer : chargePressedBufferInMotion;
 
@@ -180,13 +188,15 @@ public class Player : MonoBehaviour
 
     public void DebugKillPlayer()
     {
+        trailRenderer.Clear();;
         transform.position = startPosition;
         isCharging = false;
+
         canCharge = true;
         move = Vector2.zero;
     }
 
-    
+
 
     public struct CollisionInfo
     {
