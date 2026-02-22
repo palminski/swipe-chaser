@@ -40,8 +40,8 @@ public class Enemy : MonoBehaviour
                 )
             )
             {
-                player.AllowChargeDirectionChange(transform.position);
-                StartCoroutine(ImpactFrame());
+
+                StartCoroutine(ImpactFrame(player));
             }
             else
             {
@@ -49,11 +49,32 @@ public class Enemy : MonoBehaviour
             }
         }
     }
-    private IEnumerator ImpactFrame()
+    private IEnumerator ImpactFrame(Player player)
     {
+        player.RefundCharge();
+
+        // Collider2D enemyColider = GetComponent<Collider2D>();
+        // Collider2D playerColider = player.GetComponent<Collider2D>();
+
+        // Vector2 closestPointOnEnemyToPlayer = enemyColider.ClosestPoint(playerColider.bounds.center);
+        // Vector2 dir = ((Vector2)playerColider.bounds.center - closestPointOnEnemyToPlayer).normalized;
+
+        // float gap = 0.05f;
+        // Vector2 pointToJumpTo = closestPointOnEnemyToPlayer + dir * gap;
+
+        // player.SnapToPosition(pointToJumpTo);
+
+
         Time.timeScale = 0;
+        Vector2 finalPoint = player.move.x == 0 ? new(player.transform.position.x, transform.position.y) : new(transform.position.x, player.transform.position.y);
+        player.SnapToPosition(finalPoint);
         yield return new WaitForSecondsRealtime(0.2f);
+
+
         Time.timeScale = 1;
+
+
+
         Destroy(gameObject);
     }
 }

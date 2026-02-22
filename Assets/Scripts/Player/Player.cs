@@ -11,17 +11,15 @@ public class Player : MonoBehaviour
     public float moveSpeed = 1f;
     public float chargeSpeed = 1f;
     public LayerMask collidableLayers;
-    private Rigidbody2D rb;
+    [HideInInspector]public Rigidbody2D rb;
     private bool canCharge = true;
     [HideInInspector] public bool isCharging = false;
     [SerializeField] private float chargePressedBuffer = 0.2f;
     [SerializeField] private float chargePressedBufferInMotion = 0.05f;
     private float chargePressedCountdown = 0;
-
     [SerializeField] private float movePressedBuffer = 0.1f;
     private float movePressedBufferCountdown = 0;
     private Vector2 lastMovePressed = Vector2.zero;
-
 
     private Vector2 startPosition;
 
@@ -59,8 +57,6 @@ public class Player : MonoBehaviour
             movePressedBufferCountdown = 0;
             lastMovePressed = Vector2.zero;
         }
-
-
     }
 
     void FixedUpdate()
@@ -125,6 +121,16 @@ public class Player : MonoBehaviour
         isCharging = true;
     }
 
+    public void RefundCharge()
+    {
+        canCharge = true;
+    }
+
+    public void SnapToPosition(Vector2 position)
+    {
+        rb.position = position;
+    }
+
     void OnMovePressed(Vector2 moveInput)
     {
         movePressedBufferCountdown = movePressedBuffer;
@@ -170,8 +176,6 @@ public class Player : MonoBehaviour
         Charge();
     }
 
-
-
     // ====================================
 
     public void DebugKillPlayer()
@@ -182,12 +186,7 @@ public class Player : MonoBehaviour
         move = Vector2.zero;
     }
 
-    public void AllowChargeDirectionChange(Vector2 position)
-    {
-        transform.position = position;
-        canCharge = true;
-
-    }
+    
 
     public struct CollisionInfo
     {
