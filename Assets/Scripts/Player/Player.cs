@@ -65,11 +65,15 @@ public class Player : MonoBehaviour
     void FixedUpdate()
     {
         float speed = isCharging ? chargeSpeed : moveSpeed;
-        Vector2 desiredDelta = move.magnitude * speed * move.normalized;
+        Vector2 desiredDelta = move.magnitude * speed * Time.fixedDeltaTime * move.normalized;
+
+        Vector2 offsetCorrection = castHandler.GetOffsetCorrection(move.normalized, desiredDelta.magnitude);
+        // if(offsetCorrection != Vector2.zero) print(offsetCorrection);
+        desiredDelta = desiredDelta + offsetCorrection;
 
         Vector2 resolved = ResolveWithSliding(desiredDelta, 2, out bool hitWall);
         // print(resolved.magnitude);
-        if (hitWall)
+        if (hitWall && offsetCorrection==Vector2.zero)
         {
             move = Vector2.zero;
             isCharging = false;

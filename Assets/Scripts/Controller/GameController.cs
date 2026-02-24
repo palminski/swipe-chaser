@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 [DefaultExecutionOrder(-100)]
 [RequireComponent(typeof(InputController))]
@@ -37,6 +38,11 @@ public class GameController : MonoBehaviour
             #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
             #endif
+        }
+
+        if (Keyboard.current.rKey.wasPressedThisFrame)
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
     }
 }

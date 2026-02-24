@@ -68,7 +68,7 @@ public class Enemy : MonoBehaviour
         Time.timeScale = 0;
         Vector2 finalPoint = player.move.x == 0 ? new(player.transform.position.x, transform.position.y) : new(transform.position.x, player.transform.position.y);
         player.SnapToPosition(finalPoint);
-        yield return new WaitForSecondsRealtime(0.2f);
+        yield return new WaitForSecondsRealtime(0.15f);
 
 
         Time.timeScale = 1;
