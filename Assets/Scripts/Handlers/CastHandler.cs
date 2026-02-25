@@ -7,6 +7,7 @@ public class CastHandler : MonoBehaviour
     public LayerMask collidableLayers;
 
     [SerializeField] private float offsetCorrectionThreshold = 0.1f;
+    [SerializeField] private float offsetCorrectionCheckDistance = 0.3f;
     public RaycastOrigins raycastOrigins;
 
     void Awake()
@@ -50,8 +51,8 @@ public class CastHandler : MonoBehaviour
     {
         UpdateRaycastOrigins();
 
-        float distanceA = distance+skinWidth;
-        float distanceB = distance+skinWidth;
+        float distanceA = distance+offsetCorrectionCheckDistance;
+        float distanceB = distance+offsetCorrectionCheckDistance;
 
         Vector2 rayOriginA = Vector2.zero;
         Vector2 rayOriginAOffset = Vector2.zero;

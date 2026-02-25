@@ -1110,7 +1110,8 @@ MonoBehaviour:
   collidableLayers:
     serializedVersion: 2
     m_Bits: 8
-  offsetCorrectionThreshold: 0.55
+  offsetCorrectionThreshold: 0.45
+  offsetCorrectionCheckDistance: 0.03
 --- !u!96 &325168266
 TrailRenderer:
   serializedVersion: 3
