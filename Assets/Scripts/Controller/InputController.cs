@@ -6,7 +6,7 @@ public class InputController : MonoBehaviour
 {
     
     public Vector2 Move {get; private set;}
-    public event Action<Vector2> MoveChanged;
+    // public event Action<Vector2> MoveChanged;
     public event Action<Vector2> MovePressed;
     public event Action<Vector2> MoveReleased;
     public event Action AttackPressed;

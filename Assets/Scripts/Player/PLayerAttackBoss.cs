@@ -15,7 +15,7 @@ public class PlayerAttackBoss : MonoBehaviour
     [SerializeField] private GameObject[] attackObjects;
     private int attackObjectIndex = 0;
     private Coroutine attackCoroutine;
-    private Coroutine refractoryCoroutine;
+    // private Coroutine refractoryCoroutine;
     private bool canAttack = true;
     private bool canCharge = true;
     [HideInInspector] public bool isCharging = false;
@@ -197,7 +197,7 @@ public class PlayerAttackBoss : MonoBehaviour
         canAttack = false;
         yield return new WaitForSeconds(0.3f);
         canAttack = true;
-        refractoryCoroutine = null;
+        // refractoryCoroutine = null;
     }
 
     // ====================================
