@@ -99,7 +99,7 @@ public class PlayerAttackBoss : MonoBehaviour
             Vector2 direction = remaining.normalized;
             float distance = remaining.magnitude;
 
-            CastControllerResult hit = castHandler.CastBox(virtualCenter, direction, distance);
+            CastHandlerResult hit = castHandler.CastBox(virtualCenter, direction, distance);
 
             if (!hit.hit)
             {

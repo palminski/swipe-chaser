@@ -15,9 +15,9 @@ public class CastHandler : MonoBehaviour
         boxCollider = GetComponent<BoxCollider2D>();
     }
 
-    public CastControllerResult CastBox(Vector2 center, Vector2 direction, float distance)
+    public CastHandlerResult CastBox(Vector2 center, Vector2 direction, float distance)
     {
-        CastControllerResult result = new CastControllerResult
+        CastHandlerResult result = new CastHandlerResult
         {
             hit = false,
             distance = distance,
@@ -161,7 +161,7 @@ public class CastHandler : MonoBehaviour
     }
 }
 
-public struct CastControllerResult
+public struct CastHandlerResult
 {
     public bool hit;
     public float distance;
