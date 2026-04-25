@@ -17,6 +17,7 @@ public class GameController : MonoBehaviour
             Instance = this;
             Input = GetComponent<InputController>();
             PathfindingGrid = GetComponent<PathfindingGridController>();
+            PathfindingGrid.Build();
             DontDestroyOnLoad(gameObject);
         }
         else
@@ -79,5 +80,6 @@ public class GameController : MonoBehaviour
 
             }
         }
+        PathfindingGrid.Build();
     }
 }

@@ -6,7 +6,7 @@ using UnityEngine;
 [RequireComponent(typeof(CastHandler))]
 public class Player : MonoBehaviour
 {
-    private CastHandler castHandler;
+    public CastHandler castHandler;
     public Vector2 move;
     public float moveSpeed = 1f;
     public float chargeSpeed = 1f;

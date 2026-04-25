@@ -8,7 +8,7 @@ public class PathfindingGridController : MonoBehaviour
     [SerializeField] private Tilemap gridReference;
     [SerializeField] private LayerMask detectableLayers;
     [Range(0.1f, 1f)][SerializeField] private float cellSizeToSample = 0.5f;
-    private bool includeTriggers = false;
+    [SerializeField] private bool includeTriggers = false;
     public class Node
     {
         public Vector3Int cell;
