@@ -40,7 +40,6 @@ public class Enemy : MonoBehaviour
                 )
             )
             {
-
                 StartCoroutine(ImpactFrame(player));
             }
             else

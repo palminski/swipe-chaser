@@ -75,6 +75,7 @@ public class EntityMovePatrol : MonoBehaviour
 
     void OnDrawGizmos()
     {
+        if (Application.isPlaying) return;
         if (localWaypoints != null && localWaypoints.Length >= 2)
         {
             Gizmos.color = Color.magenta;

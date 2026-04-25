@@ -8,6 +8,7 @@ public class GameController : MonoBehaviour
 {
     public static GameController Instance { get; private set; }
     [HideInInspector] public InputController Input;
+    [HideInInspector] public PathfindingGridController PathfindingGrid;
 
     void Awake()
     {
@@ -15,6 +16,7 @@ public class GameController : MonoBehaviour
         {
             Instance = this;
             Input = GetComponent<InputController>();
+            PathfindingGrid = GetComponent<PathfindingGridController>();
             DontDestroyOnLoad(gameObject);
         }
         else
@@ -26,7 +28,7 @@ public class GameController : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
+        SetActiveRoomBasedOnPlayerPosition();
     }
 
     // Update is called once per frame
@@ -43,6 +45,39 @@ public class GameController : MonoBehaviour
         if (Keyboard.current.rKey.wasPressedThisFrame)
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }
+    }
+
+    public void SetActiveRoom()
+    {
+        
+    }
+
+    public void SetActiveRoomBasedOnPlayerPosition()
+    {
+        GameObject playerGameObject = GameObject.FindGameObjectWithTag("Player");
+
+        if(playerGameObject  == null)
+        {
+            Debug.LogWarning("Player Not Found!");
+            return;
+        }
+        Room[] rooms = FindObjectsByType<Room>(FindObjectsSortMode.None);
+        int defaultLayer = LayerMask.NameToLayer("Default");
+        int enemyBlockedLayer = LayerMask.NameToLayer("EnemyCanNotPass");
+        foreach (Room room in rooms)
+        {   
+            room.gameObject.layer = enemyBlockedLayer;
+        }
+        Collider2D[] hits = Physics2D.OverlapPointAll(playerGameObject.transform.position);
+        foreach (Collider2D hit in hits)
+        {
+            Room room = hit.GetComponent<Room>();
+            if (room != null)
+            {
+                room.gameObject.layer = defaultLayer;
+
+            }
         }
     }
 }

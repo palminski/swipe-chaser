@@ -46,10 +46,18 @@ public class EntityMoveBounce : MonoBehaviour
 
     void OnDrawGizmos()
     {
+        if (Application.isPlaying) return;
         Gizmos.color = Color.magenta;
         float startRadians = startAngle * Mathf.Deg2Rad;
         Vector2 rayDirection = new Vector2(Mathf.Cos(startRadians), Mathf.Sin(startRadians));
         Gizmos.DrawLine(transform.position, transform.position + (Vector3)rayDirection * 2);
+
+        //Triangle
+        Vector2 right = Quaternion.Euler(0,0, 25f) * -rayDirection;
+        Vector2 left = Quaternion.Euler(0,0, -25f) * -rayDirection;
+
+        Gizmos.DrawLine(transform.position + (Vector3)rayDirection * 2, (transform.position + (Vector3)rayDirection * 2) + (Vector3)right * 0.4f);
+        Gizmos.DrawLine(transform.position + (Vector3)rayDirection * 2, (transform.position + (Vector3)rayDirection * 2) + (Vector3)left * 0.4f);
 
     }
 }

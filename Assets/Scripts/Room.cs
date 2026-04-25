@@ -27,6 +27,7 @@ public class Room : MonoBehaviour
         if(gameCamera != null && collision.CompareTag("Player"))
         {
             gameCamera.SetTargetRoomBasedOnPlayerPosition();
+            GameController.Instance.SetActiveRoomBasedOnPlayerPosition();
         }
     }
 }
