@@ -27,13 +27,17 @@ public class EntityMovementPathfinding : MonoBehaviour
         FindTarget();
     }
 
+    void OnDisable()
+    {
+        path = null;
+    }
+
     void FixedUpdate()
     {
         if (!grid) return;
 
         if (path == null || pathIndex >= path.Count)
         {
-            print("HERE [ 1 ]");
             FindTarget();
             return;
         }

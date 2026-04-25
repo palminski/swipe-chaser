@@ -30,4 +30,20 @@ public class Room : MonoBehaviour
             GameController.Instance.SetActiveRoomBasedOnPlayerPosition();
         }
     }
+
+    public void ActivateChildObjects()
+    {
+        foreach (Transform child in transform)
+        {
+            child.gameObject.SetActive(true);
+        }
+    }
+
+    public void DeactivateChildObjects()
+    {
+        foreach (Transform child in transform)
+        {
+            child.gameObject.SetActive(false);
+        }
+    }
 }

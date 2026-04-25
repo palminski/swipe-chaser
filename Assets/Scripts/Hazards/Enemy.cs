@@ -13,17 +13,14 @@ public enum HittableDirections
 public class Enemy : MonoBehaviour
 {
     [SerializeField] public HittableDirections vulnerableFrom = HittableDirections.All;
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private Vector3 startingPosition;
+    void Awake()
     {
-
+        startingPosition = transform.position;
     }
-
-    // Update is called once per frame
-    void Update()
+    void OnEnable()
     {
-
+        transform.position = startingPosition;
     }
 
     void OnTriggerEnter2D(Collider2D collider)

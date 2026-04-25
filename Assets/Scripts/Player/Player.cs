@@ -192,6 +192,7 @@ public class Player : MonoBehaviour
 
     public void DebugKillPlayer()
     {
+        print("PLAYER WAS KILLED!");
         trailRenderer.Clear();;
         transform.position = startPosition;
         isCharging = false;

@@ -44,6 +44,7 @@ public class PathfindingGridController : MonoBehaviour
     public void Build()
     {
         nodes.Clear();
+        if (!gridReference) return;
         gridReference.CompressBounds();
         bounds = gridReference.cellBounds;
 

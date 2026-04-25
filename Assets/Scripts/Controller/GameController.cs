@@ -68,6 +68,7 @@ public class GameController : MonoBehaviour
         int enemyBlockedLayer = LayerMask.NameToLayer("EnemyCanNotPass");
         foreach (Room room in rooms)
         {   
+            room.DeactivateChildObjects();
             room.gameObject.layer = enemyBlockedLayer;
         }
         Collider2D[] hits = Physics2D.OverlapPointAll(playerGameObject.transform.position);
@@ -77,7 +78,7 @@ public class GameController : MonoBehaviour
             if (room != null)
             {
                 room.gameObject.layer = defaultLayer;
-
+                room.ActivateChildObjects();
             }
         }
         PathfindingGrid.Build();
