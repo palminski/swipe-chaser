@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
-
+using System;
 [DefaultExecutionOrder(-100)]
 [RequireComponent(typeof(InputController))]
 public class GameController : MonoBehaviour
@@ -9,6 +9,7 @@ public class GameController : MonoBehaviour
     public static GameController Instance { get; private set; }
     [HideInInspector] public InputController Input;
     [HideInInspector] public PathfindingGridController PathfindingGrid;
+    public event Action<Enemy> OnEnemyKilled;
 
     void Awake()
     {
@@ -82,5 +83,17 @@ public class GameController : MonoBehaviour
             }
         }
         PathfindingGrid.Build();
+
+        RoomGate[] gates = FindObjectsByType<RoomGate>(FindObjectsSortMode.None);
+        foreach (RoomGate gate in gates)
+        {   
+            gate.ResetToDefaultLayer();
+        }
+
+    }
+
+    public void InvokeEnemyKilledEvent(Enemy enemyKilled)
+    {
+        OnEnemyKilled?.Invoke(enemyKilled);
     }
 }

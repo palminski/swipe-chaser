@@ -1,4 +1,5 @@
 using System.Collections;
+
 using UnityEngine;
 [System.Flags]
 public enum HittableDirections
@@ -70,7 +71,7 @@ public class Enemy : MonoBehaviour
         Time.timeScale = 1;
 
 
-
+        GameController.Instance.InvokeEnemyKilledEvent(this);
         Destroy(gameObject);
     }
 }
