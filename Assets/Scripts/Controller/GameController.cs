@@ -84,11 +84,11 @@ public class GameController : MonoBehaviour
         }
         PathfindingGrid.Build();
 
-        RoomGate[] gates = FindObjectsByType<RoomGate>(FindObjectsSortMode.None);
-        foreach (RoomGate gate in gates)
-        {   
-            gate.ResetToDefaultLayer();
-        }
+        // RoomGate[] gates = FindObjectsByType<RoomGate>(FindObjectsSortMode.None);
+        // foreach (RoomGate gate in gates)
+        // {   
+        //     gate.ResetToDefaultLayer();
+        // }
 
     }
 
